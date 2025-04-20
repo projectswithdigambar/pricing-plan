@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Pricing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-sans">
+    <section class="py-20 px-6 max-w-6xl mx-auto">
+        <div class="text-center mb-12">
+            <h2 id="project-name" class="text-4xl font-bold text-gray-800 mb-4">Choose Your Plan</h2>
+            <p class="text-gray-600">Flexible pricing to suit every student</p>
+        </div>
+
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-2">
+            <!-- Basic Plan -->
+            <div class="bg-white rounded-2xl shadow-xl p-8 hover:scale-105 transition-transform">
+                <h3 class="text-2xl font-bold text-indigo-600 mb-4">Basic</h3>
+                <p class="text-gray-600 mb-6">Perfect for students who just need the source code with easy setup
+                    instructions.</p>
+                <ul class="text-sm text-gray-700 space-y-3 mb-6">
+                    <li>✅ Project Source Code</li>
+                    <li>✅ Step-by-step Video Setup Guide</li>
+                    <li>❌ No Personal Support</li>
+                    <li>❌ No Remote Installation</li>
+                </ul>
+                <div id="basic-price" class="text-3xl font-bold text-gray-800 mb-4">₹1,499</div>
+                <button onclick="handlePurchase('basic')"
+                    class="w-full bg-indigo-600 text-white py-2 rounded-xl hover:bg-indigo-700">Buy Basic</button>
+            </div>
+
+            <!-- Premium Plan -->
+            <div class="bg-indigo-600 text-white rounded-2xl shadow-xl p-8 hover:scale-105 transition-transform">
+                <h3 class="text-2xl font-bold mb-4">Premium</h3>
+                <p class="mb-6">All-in-one solution with remote setup, personal support, and peace of mind.</p>
+                <ul class="text-sm space-y-3 mb-6">
+                    <li>✅ Project Source Code</li>
+                    <li>✅ Step-by-step Video Setup Guide</li>
+                    <li>✅ 1-on-1 Support on WhatsApp</li>
+                    <li>✅ Remote Installation Support</li>
+                </ul>
+                <div id="premium-price" class="text-3xl font-bold mb-4">₹3,999</div>
+                <button onclick="handlePurchase('premium')"
+                    class="w-full bg-white text-indigo-600 py-2 rounded-xl hover:bg-gray-100">Buy Premium</button>
+            </div>
+        </div>
+
+        <p class="text-center mt-12 text-sm text-gray-500">Need a custom project or bulk pricing? <a href="#"
+                class="text-indigo-600 underline">Contact Me</a></p>
+    </section>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get("id");
+
+        const pricing = {
+            "1": { name: "Waste Food Management System", basic: 24, premium: 49 },
+            "2": { name: "Jarvis AI Assistant", basic: 24, premium: 49 },
+            "python": { name: "Python Project", basic: 15, premium: 45 },
+        };
+
+        const links = {
+            "1": {
+                basic: "https://buymeacoffee.com/projectswithdigambar/e/399176",
+                premium: "https://buymeacoffee.com/projectswithdigambar/e/399154"
+            },
+            "2": {
+                basic: "https://buymeacoffee.com/projectswithdigambar/e/291693",
+                premium: "https://buymeacoffee.com/projectswithdigambar/e/291693"
+            },
+            "python": {
+                basic: "https://www.buymeacoffee.com/food-basic-1499",
+                premium: "https://www.buymeacoffee.com/food-premium-3999"
+            },
+        };
+
+        async function getCountry() {
+            try {
+                const res = await fetch("https://ipapi.co/json/");
+                const data = await res.json();
+                return data.country_name;
+            } catch (e) {
+                console.error("Country detection failed:", e);
+                return "United States";
+            }
+        }
+
+        async function updateContent() {
+            const current = pricing[projectId] || pricing["jarvis"];
+            const country = await getCountry();
+
+            let currencySymbol = "$";
+            let conversionRate = 1;
+
+            if (country === "India") {
+                currencySymbol = "₹";
+                conversionRate = await getInrExchangeRate();
+            }
+
+            const basicPrice = Math.round(current.basic * conversionRate);
+            const premiumPrice = Math.round(current.premium * conversionRate);
+
+            document.getElementById("basic-price").textContent = `${currencySymbol}${basicPrice}`;
+            document.getElementById("premium-price").textContent = `${currencySymbol}${premiumPrice}`;
+            document.getElementById("project-name").textContent = `${current.name} - Choose Your Plan`;
+        }
+
+
+        function handlePurchase(planType) {
+            const redirectUrl = links[projectId]?.[planType] || links["jarvis"][planType];
+            window.location.href = redirectUrl;
+        }
+
+        async function getInrExchangeRate() {
+            const apiKey = "6e27b84ea881f4e3540e4438"; // Replace with your actual API key
+            const url = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
+
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+
+                if (data.result === "success" && data.conversion_rates && data.conversion_rates.INR) {
+                    return data.conversion_rates.INR;
+                } else {
+                    console.error("Failed to fetch INR exchange rate");
+                    return 85; // Fallback rate
+                }
+            } catch (e) {
+                console.error("Exchange rate fetch error:", e);
+                return 85; // Fallback rate
+            }
+        }
+
+
+        updateContent();
+    </script>
+</body>
+
+</html>
